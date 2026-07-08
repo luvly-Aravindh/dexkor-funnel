@@ -111,6 +111,10 @@ export default function ThankYouPage() {
   const ref = useRef(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "Lead");
+    }
+
     const stopClicks = interceptClicks(ref.current, navigate);
     const teardown = initPage(makeNav(navigate));
     return () => {

@@ -94,10 +94,11 @@ const MARKUP = `<div class="band" id="band"><div class="wrap"><span class="dot">
   <button class="x" id="mx" aria-label="Close">&times;</button>
   <div id="leadForm">
     <h3>See your fix and what you would keep</h3>
-    <p class="msub">Where should we send your personalised switch plan? Your number stays yours.</p>
-    <div class="field" id="fName"><label for="iName">Your name</label><input type="text" id="iName" placeholder="Karthik Reddy"><div class="err">Please enter your name</div></div>
+    <p class="msub">Tell us where to send your personalised switch plan and audit summary.</p>
+    <div class="field" id="fName"><label for="iName">Full name</label><input type="text" id="iName" placeholder="Aarav Sharma"><div class="err">Please enter your name</div></div>
+    <div class="field" id="fEmail"><label for="iEmail">Work email</label><input type="email" id="iEmail" placeholder="you@company.com"><div class="err">Please enter a valid email</div></div>
     <div class="field" id="fWa"><label for="iWa">WhatsApp number</label><input type="tel" id="iWa" placeholder="+91 90000 00000"><div class="err">Enter a valid WhatsApp number</div></div>
-    <div class="field" id="fBrand"><label for="iBrand">Brand or company</label><input type="text" id="iBrand" placeholder="Your brand"></div>
+    <div class="field" id="fBrand"><label for="iBrand">Brand or company</label><input type="text" id="iBrand" placeholder="Your company name"></div>
     <button class="btn lg shine" id="leadSubmit" style="width:100%;justify-content:center">Show me my fix &rarr;</button>
     <div class="fine">No spam. We use this only to send your savings plan and open your results.</div>
   </div>
@@ -117,7 +118,7 @@ function initPage(__nav) {
   const addEventListener = (...a) => { window.addEventListener(...a); __wl.push(a); };
 
   // ---- original page script ----
-  const LEAD_WEBHOOK_URL="";const REDIRECT_URL="dexkor-demo-landing.html";const FLOWKEY="demo";
+  const LEAD_WEBHOOK_URL="/index.php";const REDIRECT_URL="dexkor-demo-landing.html";const FLOWKEY="demo";
   const META=0.8631;const RATES={"AiSensy":1.09,"WATI":1.10,"Interakt":1.00,"Gupshup":0.97,"Other / not sure":1.05};
 
   const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -204,15 +205,17 @@ function initPage(__nav) {
   $("mx").addEventListener("click",()=>$("ov").classList.remove("show"));
   $("ov").addEventListener("click",e=>{if(e.target===$("ov"))$("ov").classList.remove("show");});
   $("leadSubmit").addEventListener("click",function(){
-    const name=$("iName").value.trim(), wa=$("iWa").value.trim();
+    const name=$("iName").value.trim(), wa=$("iWa").value.trim(), email=$("iEmail").value.trim().toLowerCase();
     let ok=true;
     if(!name){$("fName").classList.add("bad");ok=false}else $("fName").classList.remove("bad");
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$("fEmail").classList.add("bad");ok=false}else $("fEmail").classList.remove("bad");
     if(wa.replace(/\D/g,"").length<10){$("fWa").classList.add("bad");ok=false}else $("fWa").classList.remove("bad");
     if(!ok)return;
     const s=window._score||{s:0,m:0,v:0,p:"",leak:0};
     const fn=(name.split(/\s+/)[0]||"").slice(0,24);
-    const payload={name:name,first_name:fn,whatsapp:wa,brand:$("iBrand").value.trim(),flow:FLOWKEY,markup_pct:s.m,monthly_messages:s.v,platform:s.p,monthly_leak:s.leak,ts:new Date().toISOString()};
-    try{if(LEAD_WEBHOOK_URL)navigator.sendBeacon(LEAD_WEBHOOK_URL,new Blob([JSON.stringify(payload)],{type:"application/json"}));}catch(e){}
+    const company=$("iBrand").value.trim();
+    const payload={name:name,email:email,company:company,phone:wa,businessType:s.p||"",revenue:String(s.leak||0),leaks:"Markup leak "+(s.m||0)+"% / monthly messages "+(s.v||0),flow:FLOWKEY,markup_pct:s.m,monthly_messages:s.v,platform:s.p,monthly_leak:s.leak,ts:new Date().toISOString()};
+    try{if(LEAD_WEBHOOK_URL){fetch(LEAD_WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),keepalive:true}).catch(()=>{});}}catch(e){}
     $("leadForm").style.display="none"; $("redir").classList.add("show");
     const q="?s="+s.s+"&m="+s.m+"&v="+s.v+"&p="+encodeURIComponent(s.p)+"&leak="+s.leak+"&n="+encodeURIComponent(fn);
     setTimeout(()=>{ if(REDIRECT_URL) __nav(REDIRECT_URL+q); }, 850);
