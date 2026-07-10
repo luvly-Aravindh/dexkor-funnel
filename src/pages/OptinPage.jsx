@@ -118,7 +118,7 @@ function initPage(__nav) {
   const addEventListener = (...a) => { window.addEventListener(...a); __wl.push(a); };
 
   // ---- original page script ----
-  const LEAD_WEBHOOK_URL="/index.php";const REDIRECT_URL="dexkor-demo-landing.html";const FLOWKEY="demo";
+  const LEAD_WEBHOOK_URL="https://getnos.io/dexkor-demo-funnel/index.php";const REDIRECT_URL="dexkor-demo-landing.html";const FLOWKEY="demo";
   const META=0.8631;const RATES={"AiSensy":1.09,"WATI":1.10,"Interakt":1.00,"Gupshup":0.97,"Other / not sure":1.05};
 
   const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
